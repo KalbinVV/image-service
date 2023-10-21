@@ -15,6 +15,7 @@ DEBUG = bool(os.environ.get('DEBUG'))
 FILES_FOLDER = os.environ.get('FILES_FOLDER')
 
 ALLOWED_FORMATS = {'image/png', 'image/jpeg'}
+ALLOWED_RESULT_FORMATS = {'png', 'jpeg'}
 
 MIN_ALLOWED_WIDTH = 1
 MAX_ALLOWED_WIDTH = 2000

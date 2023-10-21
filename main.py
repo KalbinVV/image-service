@@ -45,7 +45,11 @@ async def upload_image():
                                              max_value=100)
 
         optimisation = bool(request.form.get('optimisation'))
-        result_format = str(request.form.get("result_format"))
+        result_format = request.form.get("result_format")
+
+        if result_format not in config.ALLOWED_RESULT_FORMATS:
+            raise ValueError()
+
     except ValueError:
         return 'Invalid request', 400
 
