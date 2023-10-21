@@ -1,4 +1,6 @@
 import os.path
+import typing
+from typing import Any
 
 from werkzeug.datastructures import FileStorage
 
@@ -14,3 +16,10 @@ def save_file(file: FileStorage, file_id: int) -> str:
     file.save(dst_path)
 
     return dst_path
+
+
+def require_more_and_less_than(value: int, min_value: int, max_value: int) -> int | typing.NoReturn:
+    if value < min_value or value > max_value:
+        raise ValueError
+
+    return value

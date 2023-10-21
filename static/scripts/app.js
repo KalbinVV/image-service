@@ -89,6 +89,15 @@ $(document).ready(function(){
     if (files.length > 0) {
         formData.append('file', files[0])
 
+        const selectors_to_hide_list = ["#start", "#file-upload", "#file-drag", "#params_div", ".submit-button"]
+
+        selectors_to_hide_list.forEach((selector) => {
+            $(selector).hide(2)
+        })
+
+        $('#response-message').show(2)
+        $('#response-message').html('<h3>Пожалуйста, подождите...</h3>')
+
         $.ajax({
             url: '/upload_image',
             data: formData,
@@ -97,14 +106,17 @@ $(document).ready(function(){
             contentType: false,
             dataType: "json",
             success: function(response) {
-                $('#response-message').show(2)
+                const file_url = "/get/" + response.image_id + "/"
+
                 $('#response-message').html(`<h3> Изображение будет доступно по
-                    <a href="/get?id=${response.image_id}"> ссылке </a></h3>
+                    <a href="${file_url}"> ссылке </a></h3>
                 `)
 
-                $('#start').hide(2)
-                $('#file-upload').hide(2)
-                $('#file-drag').hide(2)
+                $('#wait_before_redirect').show(2)
+
+                setTimeout(() => {
+                    window.location.href = file_url
+                }, 3000)
             }
         })
     }

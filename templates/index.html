@@ -25,23 +25,25 @@
   </label>
 
   <div id="response">
-    <div id="response-message" style="display: none;"></div>
+    <h3 id="response-message" style="display: none;"></h3>
+    <h3 id="wait_before_redirect" style="display: none;">Вы будете автоматически перенаправлены через 3 секунды...</h3>
   </div>
 
-  <p>Допустимые форматы: png, jpg</p>
+  <div id="params_div">
+    <p>Допустимые форматы: png, jpg</p>
+    <h2>Параметры:</h2>
 
-  <h2>Параметры:</h2>
+    <p>Высота изображения: <input type="number" min="1" max="2000" id="width_input" required></p>
+    <p>Ширина изображения: <input type="number" min="1" max="2000" id="height_input" required></p>
+    <p>Качество (<span id="quality-value">95%</span>): <input type="range" id="quality-input" name="quality" min="1" max="100" value=95 /></p>
+    <p>Оптимизация: <input type='checkbox' name='optimisation-enabled' id='optimisation-checkbox'></p>
 
-  <p>Высота изображения: <input type="number" min="1" max="2000" id="width_input" required></p>
-  <p>Ширина изображения: <input type="number" min="1" max="2000" id="height_input" required></p>
-  <p>Качество (<span id="quality-value">95%</span>): <input type="range" id="quality-input" name="quality" min="1" max="100" value=95 /></p>
-  <p>Оптимизация: <input type='checkbox' name='optimisation-enabled' id='optimisation-checkbox'></p>
-
-  <p>Сохранить как: <select class="btn btn-primary" id="result-format">
-    <option value="png">PNG</option>
-    <option value="jpg">JPEG</option>
-  </select>
-  </p>
+    <p>Сохранить как: <select class="btn btn-primary" id="result-format">
+        <option value="png">PNG</option>
+        <option value="jpg">JPEG</option>
+      </select>
+    </p>
+  </div>
 
   <input type='submit' value='Начать!' class='btn btn-primary submit-button'>
 </form>

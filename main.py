@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 
 from flask import Flask, render_template, request, send_file, url_for
@@ -9,6 +8,7 @@ import config
 import db
 from api import create_process_task
 from db import init_tables
+from utils import require_more_and_less_than
 
 app = Flask(__name__)
 
@@ -22,28 +22,31 @@ def index():
 
 @app.route('/upload_image', methods=['POST'])
 async def upload_image():
-    required_fields = {'width', "height", "quality", "optimisation", "result_format"}
+    required_fields = {'width',
+                       "height",
+                       "quality",
+                       "optimisation",
+                       "result_format"}
 
     for required_field in required_fields:
         if required_field not in request.form.keys():
             return 'Invalid request', 400
 
     try:
-        width = int(request.form.get('width'))
-        height = int(request.form.get('height'))
-        quality = int(request.form.get('quality'))
+        width = require_more_and_less_than(int(request.form.get('width')),
+                                           config.MIN_ALLOWED_WIDTH,
+                                           config.MAX_ALLOWED_WIDTH)
+        height = require_more_and_less_than(int(request.form.get('height')),
+                                            config.MIN_ALLOWED_HEIGHT,
+                                            config.MAX_ALLOWED_HEIGHT)
+
+        quality = require_more_and_less_than(int(request.form.get('quality')),
+                                             min_value=1,
+                                             max_value=100)
+
         optimisation = bool(request.form.get('optimisation'))
         result_format = str(request.form.get("result_format"))
     except ValueError:
-        return 'Invalid request', 400
-
-    if width <= 0 or width > config.MAX_ALLOWED_WIDTH:
-        return 'Invalid request', 400
-
-    if height <= 0 or height > config.MAX_ALLOWED_HEIGHT:
-        return 'Invalid request', 400
-
-    if quality <= 0 or quality >= 100:
         return 'Invalid request', 400
 
     if 'file' not in request.files.keys():
@@ -59,13 +62,8 @@ async def upload_image():
     return {'image_id': image_id}
 
 
-@app.route("/get", methods=["GET"])
-async def get_image():
-    if 'id' not in request.args.keys():
-        return 'Invalid request', 400
-
-    image_id = request.args.get('id')
-
+@app.route("/get/<int:image_id>/", methods=["GET"])
+async def get_image(image_id: int):
     with Session(bind=db.Engine) as session:
         image = session.query(db.Image).filter_by(id=image_id).first()
 
@@ -73,8 +71,8 @@ async def get_image():
             return render_template("404.html"), 404
 
         if image.status == db.StatusEnum.completed:
-            if os.path.exists(image.file_path):
-                return send_file(image.file_path)
+            if os.path.exists(image.result_file_path):
+                return send_file(image.result_file_path)
 
             return render_template("404.html"), 404
 
@@ -89,4 +87,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-

@@ -20,7 +20,8 @@ class Image(Base):
     __tablename__ = 'images'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    file_path = Column(Text)
+    source_file_path = Column(Text)
+    result_file_path = Column(Text)
     loaded_at = Column(Date, nullable=False)
 
     status = Column(Enum(StatusEnum), nullable=False)

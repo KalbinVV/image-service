@@ -12,25 +12,20 @@ from utils import save_file
 
 from PIL import Image
 
-image_processing_tasks = set()
-
 
 async def create_process_task(file: FileStorage, width: int, height: int,
                               quality: int, optimisation: bool, result_format: str) -> int:
     with Session(bind=db.Engine) as session:
-        image = db.Image(loaded_at=datetime.datetime.now(), status=db.StatusEnum.processing)
+        image = db.Image(loaded_at=datetime.datetime.now(),
+                         status=db.StatusEnum.processing)
 
         session.add(image)
         session.commit()
 
-        task = asyncio.create_task(process_image(file, width, height, quality,
-                                                 optimisation, result_format, image.id))
-
-        image_processing_tasks.add(task)
+        asyncio.create_task(process_image(file, width, height, quality,
+                                          optimisation, result_format, image.id))
 
         logging.info(f"Новая задача... (image_id: {image.id})")
-
-        task.add_done_callback(image_processing_tasks.discard)
 
         return image.id
 
@@ -40,6 +35,9 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
     logging.info(f"Обработка задачи... (image_id: {image_id})")
 
     file_path = save_file(file, image_id)
+
+    with Session(bind=db.Engine) as session:
+        session.query(db.Image).filter_by(id=image_id).update({"source_file_path": file_path})
 
     image = Image.open(file_path)
 
@@ -51,8 +49,9 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
     with Session(bind=db.Engine) as session:
         session.query(db.Image).filter_by(id=image_id).update({
-            "file_path": dst_path,
-            "status": db.StatusEnum.completed
+            "result_file_path": dst_path,
+            "status": db.StatusEnum.completed,
+            "source_file_path": None
         })
 
         session.commit()
