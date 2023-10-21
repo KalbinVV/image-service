@@ -59,3 +59,4 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
     os.remove(file_path)
 
     logging.info(f"Задача завершена! (image_id: {image_id})")
+
