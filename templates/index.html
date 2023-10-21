@@ -10,33 +10,38 @@
 <p>Загрузить изображение и выберете желаемые настройки</p>
 
 <form id="file-upload-form" class="uploader">
-  <input id="file-upload" type="file" name="fileUpload" accept="image/*" />
+  <input id="file-upload" type="file" name="fileUpload" accept="image/*"/>
 
   <label for="file-upload" id="file-drag">
-    <img id="file-image" src="#" alt="Preview" class="hidden">
+    <img src="{{ url_for('static',filename='images/download.png') }}" style="width: 50px; height:50px;" id="download-icon">
+    <img id="file-image" src="#" alt="Preview" style="display: none;">
     <div id="start">
       <i class="fa fa-download" aria-hidden="true"></i>
-      <div id='please_select_file_div'>Выберете файл или перетащите его сюда</div>
-      <div id="notimage_div" style='display: none;'>Неподдерживаемый формат файла!</div>
-      <div id='file_name_div' style='display: none'>Текущий файл: </div>
+      <div id='please-select-file-div'>Выберете файл или перетащите его сюда</div>
+      <div id="notimage-div" style='display: none;'>Неподдерживаемый формат файла!</div>
+      <div id='filename-div' style='display: none'>Текущий файл: </div>
       <span id="file-upload-btn" class="btn btn-primary">Выбрать файл</span>
     </div>
-    <div id="response" class="hidden">
-      <div id="messages"></div>
-      <progress class="progress" id="file-progress" value="0">
-        <span>0</span>%
-      </progress>
-    </div>
   </label>
+
+  <div id="response">
+    <div id="response-message" style="display: none;"></div>
+  </div>
 
   <p>Допустимые форматы: png, jpg</p>
 
   <h2>Параметры:</h2>
 
-  <p>Высота изображения: <input name=""></p>
-  <p>Ширина изображения: <input name=""></p>
-  <p>Качество: <input type="range" name="quality" min="0" max="100" value=95 /></p>
-  <p>Оптимизация: <input type='checkbox' name='optimisation_enabled'> </p>
+  <p>Высота изображения: <input type="number" min="1" max="2000" id="width_input" required></p>
+  <p>Ширина изображения: <input type="number" min="1" max="2000" id="height_input" required></p>
+  <p>Качество (<span id="quality-value">95%</span>): <input type="range" id="quality-input" name="quality" min="1" max="100" value=95 /></p>
+  <p>Оптимизация: <input type='checkbox' name='optimisation-enabled' id='optimisation-checkbox'></p>
+
+  <p>Сохранить как: <select class="btn btn-primary" id="result-format">
+    <option value="png">PNG</option>
+    <option value="jpg">JPEG</option>
+  </select>
+  </p>
 
   <input type='submit' value='Начать!' class='btn btn-primary submit-button'>
 </form>

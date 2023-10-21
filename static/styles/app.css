@@ -162,3 +162,16 @@ p {
 .submit-button {
     width: 50%;
 }
+
+.center-section{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.medium-image {
+    width: 30%;
+    height: 30%;
+}

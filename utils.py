@@ -1,0 +1,16 @@
+import os.path
+
+from werkzeug.datastructures import FileStorage
+
+import config
+
+
+def save_file(file: FileStorage, file_id: int) -> str:
+    dst_path = os.path.join(config.FILES_FOLDER, f'source-image-{file_id}.png')
+
+    if not os.path.exists(config.FILES_FOLDER):
+        os.makedirs(config.FILES_FOLDER)
+
+    file.save(dst_path)
+
+    return dst_path
