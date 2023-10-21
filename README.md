@@ -6,6 +6,8 @@
 
 git clone https://github.com/KalbinVV/image-service.git
 
+cd image-service
+
 docker build . --tag image-service:latest
 
 docker run -i -t -p 5000:5000 --name image-service image-service:latest
