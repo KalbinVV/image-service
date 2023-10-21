@@ -12,6 +12,14 @@ $(document).ready(function(){
   const dropFileZone = document.querySelector("#file-drag")
   const uploadInput = document.querySelector('#file-upload')
 
+  dropFileZone.addEventListener('dragenter', (e) => {
+    $('.uploader label').addClass('active')
+  })
+
+  dropFileZone.addEventListener('dragleave', (e) => {
+    $('.uploader label').removeClass('active')
+  })
+
   document.addEventListener('dragover', (e) => {
     e.preventDefault()
   })
@@ -30,6 +38,8 @@ $(document).ready(function(){
         uploadInput.files = event.dataTransfer.files
 
         uploadInput.dispatchEvent(new Event("change"))
+
+        $('.uploader label').removeClass('active')
     }
   })
 
@@ -89,7 +99,9 @@ $(document).ready(function(){
     if (files.length > 0) {
         formData.append('file', files[0])
 
-        const selectors_to_hide_list = ["#start", "#file-upload", "#file-drag", "#params_div", ".submit-button"]
+        const selectors_to_hide_list = ["#start", "#file-upload",
+                                        "#file-drag", "#params_div",
+                                        ".submit-button", ".form-title"]
 
         selectors_to_hide_list.forEach((selector) => {
             $(selector).hide(2)

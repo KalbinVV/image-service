@@ -175,3 +175,7 @@ p {
     width: 30%;
     height: 30%;
 }
+
+.active {
+    border-color: #454cad !important;
+}

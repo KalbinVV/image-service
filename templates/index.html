@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Сжать/ изменить размер изображения</title>
+    <title>Сжать / изменить размер изображения</title>
     <link rel="stylesheet" href="{{ url_for('static',filename='styles/app.css') }}">
+    <link type="image/x-icon" href="{{ url_for('static',filename='images/favicon.ico') }}" rel="shortcut icon">
 </head>
 <h2>Сжать / изменить размер изображения</h2>
-<p>Загрузить изображение и выберете желаемые настройки</p>
+<p class="form-title">Загрузить изображение и выберете желаемые настройки</p>
 
 <form id="file-upload-form" class="uploader">
   <input id="file-upload" type="file" name="fileUpload" accept="image/*"/>
