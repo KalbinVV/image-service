@@ -12,6 +12,9 @@ from utils import save_file
 
 from PIL import Image
 
+# Все текущие задачи по обработке изображений
+processing_tasks: set[asyncio.Task] = set()
+
 
 async def create_process_task(file: FileStorage, width: int, height: int,
                               quality: int, optimisation: bool, result_format: str) -> int:
@@ -22,8 +25,12 @@ async def create_process_task(file: FileStorage, width: int, height: int,
         session.add(image)
         session.commit()
 
-        asyncio.create_task(process_image(file, width, height, quality,
-                                          optimisation, result_format, image.id))
+        task = asyncio.create_task(process_image(file, width, height, quality,
+                                                 optimisation, result_format, image.id))
+
+        processing_tasks.add(task)
+
+        task.add_done_callback(processing_tasks.discard)
 
         logging.info(f"Новая задача... (image_id: {image.id})")
 
@@ -36,9 +43,6 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
     file_path = save_file(file, image_id)
 
-    with Session(bind=db.Engine) as session:
-        session.query(db.Image).filter_by(id=image_id).update({"source_file_path": file_path})
-
     image = Image.open(file_path)
 
     image = image.resize((width, height), Image.LANCZOS)
@@ -50,13 +54,26 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
     with Session(bind=db.Engine) as session:
         session.query(db.Image).filter_by(id=image_id).update({
             "result_file_path": dst_path,
-            "status": db.StatusEnum.completed,
-            "source_file_path": None
+            "status": db.StatusEnum.completed
         })
 
         session.commit()
 
+    # Удаляем исходный файл после обработки
     os.remove(file_path)
 
     logging.info(f"Задача завершена! (image_id: {image_id})")
 
+
+def cancel_all_current_tasks():
+    # Завершаем все текущие задачи
+    for task in processing_tasks:
+        task.cancel()
+
+    with Session(bind=db.Engine) as session:
+        # Обозначаем все незаконченные задачи в базе данных как прерванные
+        session.query(db.Image).filter_by(status=db.StatusEnum.processing).update({
+            "status": db.StatusEnum.cancelled
+        })
+
+        session.commit()

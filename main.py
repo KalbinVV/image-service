@@ -1,12 +1,13 @@
-import asyncio
+import logging
 import os
+import sys
 
 from flask import Flask, render_template, request, send_file, abort
 from sqlalchemy.orm import Session
 
 import config
 import db
-from api import create_process_task
+from api import create_process_task, cancel_all_current_tasks
 from db import init_tables
 from utils import require_more_and_less_than
 
@@ -22,7 +23,7 @@ def page_not_found(_e):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', allowed_formats=', '.join(config.ALLOWED_FORMATS))
 
 
 @app.route('/upload_image', methods=['POST'])
@@ -33,10 +34,12 @@ async def upload_image():
                        "optimisation",
                        "result_format"}
 
+    # Проверяем были ли отправлены все необходимые поля
     for required_field in required_fields:
         if required_field not in request.form.keys():
-            return 'Invalid request', 400
+            return 'Неправильные входные данные', 400
 
+    #  Проверяем правильного ли они типа и значения
     try:
         width = require_more_and_less_than(int(request.form.get('width')),
                                            config.MIN_ALLOWED_WIDTH,
@@ -56,15 +59,16 @@ async def upload_image():
             raise ValueError()
 
     except ValueError:
-        return 'Invalid request', 400
+        return 'Неправильные входные данные', 400
 
+    #  Если пользователь не отправил файл
     if 'file' not in request.files.keys():
-        return 'Invalid request', 400
+        return 'Неправильные входные данные', 400
 
     file = request.files.get('file')
 
     if file.content_type not in config.ALLOWED_FORMATS:
-        return "Invalid file format", 400
+        return "Неправильный формат файла", 400
 
     image_id = await create_process_task(file, width, height, quality, optimisation, result_format)
 
@@ -80,6 +84,7 @@ async def get_image(image_id: int):
             abort(404)
 
         if image.status == db.StatusEnum.completed:
+            # Если файл существует в базе данных, но его удалили из хранилища
             if os.path.exists(image.result_file_path):
                 return send_file(image.result_file_path)
 
@@ -88,11 +93,11 @@ async def get_image(image_id: int):
         return render_template('please-wait.html')
 
 
-async def main():
+def main():
     init_tables()
 
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

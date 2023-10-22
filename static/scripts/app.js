@@ -129,7 +129,10 @@ $(document).ready(function(){
                 setTimeout(() => {
                     window.location.href = file_url
                 }, 3000)
-            }
+            },
+          error: function (jqXHR, textStatus, errorThrown) {
+            alert('Не удалось отправить запрос: ' + errorThrown)
+          }
         })
     }
   })
