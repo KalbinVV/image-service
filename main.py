@@ -97,7 +97,8 @@ async def get_image(image_id: int):
 def main():
     init_tables()
 
-    # Обрабатываем задачи, которые не удалось завершить после перезагрузки
+    # Обрабатываем задачи, которые были отменены или их
+    # не удалось завершить после перезагрузки
     process_cancelled_tasks()
 
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)

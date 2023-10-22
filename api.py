@@ -59,6 +59,9 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
             session.commit()
 
+            # Удаляем некорректный файл из хранилища
+            os.remove(file_path)
+
             return
 
     # Если пользователь не желает изменять ширину изображения
@@ -97,7 +100,8 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
     logging.info(f"Задача завершена! (image_id: {image_id})")
 
 
-# Удаляем задачи из базы данных, которые не были выполнены из-за прерывания работы сервиса
+# Удаляем задачи из базы данных, которые были отменены, либо не были выполнены
+# из-за прерывания работы сервиса
 def process_cancelled_tasks():
     with Session(db.Engine) as session:
         tasks: list[type[db.Image]] = session.query(db.Image)\
