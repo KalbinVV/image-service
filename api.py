@@ -52,8 +52,10 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
     try:
         image = Image.open(file_path)
-    # Защита от попытки загрузить неверный формат (пустой файл)
+    # Защита от попытки загрузить неверный формат (пустой файл, либо подмененный)
     except UnidentifiedImageError:
+        logging.info(f"Задача была отменена! (image_id: {image_id})")
+
         with Session(bind=db.Engine) as session:
             session.query(db.Image).filter_by(id=image_id).update({"status": db.StatusEnum.cancelled})
 
