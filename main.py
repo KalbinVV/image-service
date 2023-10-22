@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file, abort
 from sqlalchemy.orm import Session
 
 import config
@@ -13,6 +13,11 @@ from utils import require_more_and_less_than
 app = Flask(__name__)
 
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # Запрещаем входные файлы больше 5 мегабайт
+
+
+@app.errorhandler(404)
+def page_not_found(_e):
+    return render_template('404.html'), 404
 
 
 @app.route('/')
@@ -72,13 +77,13 @@ async def get_image(image_id: int):
         image = session.query(db.Image).filter_by(id=image_id).first()
 
         if image is None or image.status == db.StatusEnum.cancelled:
-            return render_template("404.html"), 404
+            abort(404)
 
         if image.status == db.StatusEnum.completed:
             if os.path.exists(image.result_file_path):
                 return send_file(image.result_file_path)
 
-            return render_template("404.html"), 404
+            abort(404)
 
         return render_template('please-wait.html')
 
