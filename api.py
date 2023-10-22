@@ -51,6 +51,14 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
     image = Image.open(file_path)
 
+    # Если пользователь не желает изменять ширину изображения
+    if width == 0:
+        width = image.width
+
+    # Если пользователь не желает изменять высоту изображения
+    if height == 0:
+        height = image.height
+
     image = image.resize((width, height), Image.LANCZOS)
 
     dst_path = os.path.join(config.FILES_FOLDER, f'image-{image_id}.{result_format}')

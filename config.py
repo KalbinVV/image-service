@@ -14,11 +14,11 @@ DEBUG = False
 
 FILES_FOLDER = os.environ.get('FILES_FOLDER')
 
-ALLOWED_FORMATS = {'image/png', 'image/jpeg'}
-ALLOWED_RESULT_FORMATS = {'png', 'jpeg'}
+ALLOWED_FORMATS = {'image/png', 'image/jpeg', 'image/bmp'}
+ALLOWED_RESULT_FORMATS = {'png', 'jpeg', 'bmp'}
 
-MIN_ALLOWED_WIDTH = 1
+MIN_ALLOWED_WIDTH = 0
 MAX_ALLOWED_WIDTH = 2000
 
-MIN_ALLOWED_HEIGHT = 1
+MIN_ALLOWED_HEIGHT = 0
 MAX_ALLOWED_HEIGHT = 2000

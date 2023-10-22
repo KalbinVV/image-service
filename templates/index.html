@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Сжать / изменить размер изображения</title>
+    <title>Сжать / изменить / конвертировать изображение</title>
     <link rel="stylesheet" href="{{ url_for('static',filename='styles/app.css') }}">
     <link type="image/x-icon" href="{{ url_for('static',filename='images/favicon.ico') }}" rel="shortcut icon">
 </head>
-<h2>Сжать / изменить размер изображения</h2>
+<h2>Сжать / изменить / конвертировать изображение</h2>
 <p class="form-title">Загрузить изображение и выберете желаемые настройки</p>
 
 <form id="file-upload-form" class="uploader">
@@ -34,14 +34,17 @@
     <p>Допустимые форматы: {{ allowed_formats }}</p>
     <h2>Параметры:</h2>
 
-    <p>Высота изображения: <input type="number" min="1" max="2000" id="width_input" required></p>
-    <p>Ширина изображения: <input type="number" min="1" max="2000" id="height_input" required></p>
+    <p>Высота изображения: <input type="number" min="0" max="2000" value="0" id="width_input" required></p>
+      <p>Оставьте 0, если не хотите изменять высоту изображения</p>
+    <p>Ширина изображения: <input type="number" min="0" max="2000" value="0" id="height_input" required></p>
+      <p>Оставьте 0, если не хотите изменять ширину изображения</p>
     <p>Качество (<span id="quality-value">95%</span>): <input type="range" id="quality-input" name="quality" min="1" max="100" value=95 /></p>
     <p>Оптимизация: <input type='checkbox' name='optimisation-enabled' id='optimisation-checkbox'></p>
 
     <p>Сохранить как: <select class="btn btn-primary" id="result-format">
         <option value="png">PNG</option>
         <option value="jpeg">JPEG</option>
+        <option value="bmp">BMP</option>
       </select>
     </p>
   </div>

@@ -43,7 +43,7 @@ $(document).ready(function(){
     }
   })
 
-  const allowedFileFormats = ['png', 'jpg']
+  const allowedFileFormats = ['png', 'jpg', 'bmp']
 
   $('#file-upload').change(function(e){
     const uploadedFile = this.files[0]
@@ -78,13 +78,13 @@ $(document).ready(function(){
 
     const width = $('#width_input').val()
 
-    if(width <= 0 || width > MAX_ALLOWED_WIDTH) {
+    if(width < 0 || width > MAX_ALLOWED_WIDTH) {
         return;
     }
 
     const height = $('#height_input').val()
 
-    if (height <= 0 || height > MAX_ALLOWED_HEIGHT){
+    if (height < 0 || height > MAX_ALLOWED_HEIGHT){
         return;
     }
 
