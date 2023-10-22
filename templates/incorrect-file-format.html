@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Сжать / изменить / конвертировать изображение</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/app.css') }}">
+    <link type="image/x-icon" href="{{ url_for('static',filename='images/favicon.ico') }}" rel="shortcut icon">
+</head>
+<body>
+<section class="center-section">
+    <img src="{{ url_for('static',filename='images/warning.png') }}" class="medium-image">
+    <h2>Неверный формат файла!</h2>
+    <p>Операция была прервана, проверьте файл, либо загрузите другой.</p>
+    <p><h3><a href="/" class="btn btn-primary">На главную страницу</a></h3></p>
+</section>
+</body>
+</html>

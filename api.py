@@ -3,6 +3,7 @@ import datetime
 import logging
 import os.path
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from werkzeug.datastructures import FileStorage
 
@@ -10,7 +11,7 @@ import config
 import db
 from utils import save_file
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 # Все текущие задачи по обработке изображений
 processing_tasks: set[asyncio.Task] = set()
@@ -49,7 +50,16 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
         session.commit()
 
-    image = Image.open(file_path)
+    try:
+        image = Image.open(file_path)
+    # Защита от попытки загрузить неверный формат (пустой файл)
+    except UnidentifiedImageError:
+        with Session(bind=db.Engine) as session:
+            session.query(db.Image).filter_by(id=image_id).update({"status": db.StatusEnum.cancelled})
+
+            session.commit()
+
+            return
 
     # Если пользователь не желает изменять ширину изображения
     if width == 0:
@@ -90,7 +100,9 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 # Удаляем задачи из базы данных, которые не были выполнены из-за прерывания работы сервиса
 def process_cancelled_tasks():
     with Session(db.Engine) as session:
-        tasks: list[type[db.Image]] = session.query(db.Image).filter_by(status=db.StatusEnum.processing).all()
+        tasks: list[type[db.Image]] = session.query(db.Image)\
+            .filter(or_(db.Image.status == db.StatusEnum.processing,
+                        db.Image.status == db.StatusEnum.cancelled)).all()
 
         for task in tasks:
             result_file_path = task.result_file_path
@@ -107,7 +119,7 @@ def process_cancelled_tasks():
                 os.remove(source_file_path)
 
             # Удаляем задачу, если не удалось восстановить её
-            if task.status == db.StatusEnum.processing:
+            if task.status != db.StatusEnum.completed:
                 session.delete(task)
 
         session.commit()

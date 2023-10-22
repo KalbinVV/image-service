@@ -81,6 +81,9 @@ async def get_image(image_id: int):
         if image is None:
             abort(404)
 
+        if image.status == db.StatusEnum.cancelled:
+            return render_template('incorrect-file-format.html'), 400
+
         if image.status == db.StatusEnum.completed:
             # Если файл существует в базе данных, но его удалили из хранилища
             if os.path.exists(image.result_file_path):

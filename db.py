@@ -13,6 +13,7 @@ Base = declarative_base()
 class StatusEnum(enum.StrEnum):
     processing = 'processing'
     completed = 'completed'
+    cancelled = 'cancelled'
 
 
 class Image(Base):
