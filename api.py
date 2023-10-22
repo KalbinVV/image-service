@@ -43,37 +43,63 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
 
     file_path = save_file(file, image_id)
 
+    # Сохраняем путь до исходного файла в случае экстренного прерывания сервиса
+    with Session(bind=db.Engine) as session:
+        session.query(db.Image).filter_by(id=image_id).update({"source_file_path": file_path})
+
+        session.commit()
+
     image = Image.open(file_path)
 
     image = image.resize((width, height), Image.LANCZOS)
 
     dst_path = os.path.join(config.FILES_FOLDER, f'image-{image_id}.{result_format}')
 
-    image.save(dst_path, format=result_format, optimize=optimisation, quality=quality)
-
+    # Сохраняем путь к результату, перед началом загрузки на диск, в случае перезагрузки
     with Session(bind=db.Engine) as session:
         session.query(db.Image).filter_by(id=image_id).update({
-            "result_file_path": dst_path,
-            "status": db.StatusEnum.completed
+            "result_file_path": dst_path
         })
 
         session.commit()
 
+    image.save(dst_path, format=result_format, optimize=optimisation, quality=quality)
+
     # Удаляем исходный файл после обработки
     os.remove(file_path)
+
+    with Session(bind=db.Engine) as session:
+        session.query(db.Image).filter_by(id=image_id).update({
+            "status": db.StatusEnum.completed,
+            "source_file_path": None
+        })
+
+        session.commit()
 
     logging.info(f"Задача завершена! (image_id: {image_id})")
 
 
-def cancel_all_current_tasks():
-    # Завершаем все текущие задачи
-    for task in processing_tasks:
-        task.cancel()
+# Удаляем задачи из базы данных, которые не были выполнены из-за прерывания работы сервиса
+def process_cancelled_tasks():
+    with Session(db.Engine) as session:
+        tasks: list[type[db.Image]] = session.query(db.Image).filter_by(status=db.StatusEnum.processing).all()
 
-    with Session(bind=db.Engine) as session:
-        # Обозначаем все незаконченные задачи в базе данных как прерванные
-        session.query(db.Image).filter_by(status=db.StatusEnum.processing).update({
-            "status": db.StatusEnum.cancelled
-        })
+        for task in tasks:
+            result_file_path = task.result_file_path
+
+            # Если файл начал загружаться, однако процесс был прерван
+            if result_file_path is not None:
+                if os.path.exists(result_file_path):
+                    os.remove(result_file_path)
+
+            source_file_path = task.source_file_path
+
+            # Удаляем исходный файл, если система не успела его удалить
+            if source_file_path and os.path.exists(source_file_path):
+                os.remove(source_file_path)
+
+            # Удаляем задачу, если не удалось восстановить её
+            if task.status == db.StatusEnum.processing:
+                session.delete(task)
 
         session.commit()

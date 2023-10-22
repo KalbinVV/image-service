@@ -1,13 +1,11 @@
-import logging
 import os
-import sys
 
 from flask import Flask, render_template, request, send_file, abort
 from sqlalchemy.orm import Session
 
 import config
 import db
-from api import create_process_task, cancel_all_current_tasks
+from api import create_process_task, process_cancelled_tasks
 from db import init_tables
 from utils import require_more_and_less_than
 
@@ -80,7 +78,7 @@ async def get_image(image_id: int):
     with Session(bind=db.Engine) as session:
         image = session.query(db.Image).filter_by(id=image_id).first()
 
-        if image is None or image.status == db.StatusEnum.cancelled:
+        if image is None:
             abort(404)
 
         if image.status == db.StatusEnum.completed:
@@ -95,6 +93,9 @@ async def get_image(image_id: int):
 
 def main():
     init_tables()
+
+    # Обрабатываем задачи, которые не удалось завершить после перезагрузки
+    process_cancelled_tasks()
 
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
 

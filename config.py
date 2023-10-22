@@ -10,7 +10,7 @@ DB_URL = os.environ.get('DB_URL')
 
 HOST = os.environ.get('HOST')
 PORT = int(os.environ.get('PORT'))
-DEBUG = bool(os.environ.get('DEBUG'))
+DEBUG = False
 
 FILES_FOLDER = os.environ.get('FILES_FOLDER')
 
