@@ -74,6 +74,13 @@ async def process_image(file: FileStorage, width: int, height: int, quality: int
     if height == 0:
         height = image.height
 
+    # Убираем альфа канал для форматов, которые его не поддерживают
+    unsupported_rgba_format_lists = {'jpeg', 'bmp'}
+
+    if result_format in unsupported_rgba_format_lists:
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+
     image = image.resize((width, height), Image.LANCZOS)
 
     dst_path = os.path.join(config.FILES_FOLDER, f'image-{image_id}.{result_format}')
